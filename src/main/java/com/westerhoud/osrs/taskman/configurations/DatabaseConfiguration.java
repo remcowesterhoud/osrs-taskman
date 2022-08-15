@@ -1,4 +1,4 @@
-package com.westerhoud.osrs.taskman;
+package com.westerhoud.osrs.taskman.configurations;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
 @Configuration
-public class DatabaseConfig {
+public class DatabaseConfiguration {
     @Value("${spring.datasource.url}")
     private String dbUrl;
     @Value("${spring.datasource.username}")
