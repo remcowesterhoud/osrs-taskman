@@ -1,25 +1,8 @@
-CREATE TABLE IF NOT EXISTS tier (
-    id int NOT NULL PRIMARY KEY,
-    name varchar(15) NOT NULL
-);
-
-INSERT INTO tier (id, name)
-VALUES
-    (1, 'EASY'),
-    (2, 'MEDIUM'),
-    (3, 'HARD'),
-    (4, 'ELITE'),
-    (5, 'PETS'),
-    (6, 'PASSIVE'),
-    (7, 'EXTRA')
-ON CONFLICT DO NOTHING;
-
-
 CREATE TABLE IF NOT EXISTS task (
 
     id SERIAL NOT NULL PRIMARY KEY,
     name varchar(255) NOT NULL,
-    tier int NOT NULL REFERENCES tier,
+    tier varchar(16) NOT NULL,
     info varchar(255) NOT NULL
 );
 

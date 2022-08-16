@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -24,6 +25,8 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean enabled;
+    @OneToMany(mappedBy = "account")
+    private List<AccountTask> accountTasks;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
