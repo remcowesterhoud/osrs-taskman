@@ -53,8 +53,10 @@ public class AccountTaskService {
     }
 
     @Transactional
-    public AccountTask completeTask(final long accountId, final long accountTaskId) {
-        final var accountTask = accountTaskRepository.findById(accountTaskId).orElseThrow();
+    public AccountTask completeTask(final long accountId) {
+        final var accountTask =
+                accountRepository.findById(accountId).orElseThrow()
+                        .getActiveTask().orElseThrow();
         accountTask.setEndTime(new Date());
 
         final var account = accountTask.getAccount();

@@ -31,6 +31,8 @@ public class AccountTask {
         return AccountTaskDto.builder()
                 .account(account.toDto())
                 .task(task.toDto())
+                .startTime(startTime)
+                .endTime(endTime)
                 .build();
     }
 }
