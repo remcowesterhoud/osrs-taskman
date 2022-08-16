@@ -4,10 +4,7 @@ import com.westerhoud.osrs.taskman.dto.AccountTaskDto;
 import com.westerhoud.osrs.taskman.model.AccountTask;
 import com.westerhoud.osrs.taskman.services.AccountTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
 
@@ -21,5 +18,10 @@ public class AccountTaskController {
     @PostMapping("/generate")
     AccountTaskDto generateTask(@PathVariable final long accountId) {
         return accountTaskService.generateTask(accountId).toDto();
+    }
+
+    @PostMapping("/{accountTaskId}")
+    AccountTaskDto completeTask(@PathVariable final long accountId, @PathVariable final long accountTaskId) {
+        return accountTaskService.completeTask(accountId, accountTaskId).toDto();
     }
 }
