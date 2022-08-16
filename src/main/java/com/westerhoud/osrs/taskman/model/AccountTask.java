@@ -1,8 +1,10 @@
 package com.westerhoud.osrs.taskman.model;
 
+import com.westerhoud.osrs.taskman.dto.AccountTaskDto;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @AllArgsConstructor
@@ -22,4 +24,13 @@ public class AccountTask {
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
+    private Date startTime;
+    private Date endTime;
+
+    public AccountTaskDto toDto() {
+        return AccountTaskDto.builder()
+                .account(account.toDto())
+                .task(task.toDto())
+                .build();
+    }
 }

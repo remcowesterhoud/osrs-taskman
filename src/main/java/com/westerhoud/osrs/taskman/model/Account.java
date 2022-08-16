@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Entity
 @AllArgsConstructor
@@ -25,8 +27,25 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean enabled;
+    @Enumerated(EnumType.STRING)
+    private Tier tier;
     @OneToMany(mappedBy = "account")
     private List<AccountTask> accountTasks;
+
+    public List<Task> getCompletedTasks() {
+        return accountTasks.stream()
+                .filter(task -> task.getEndTime() != null)
+                .map(AccountTask::getTask)
+                .collect(Collectors.toList());
+    }
+
+    public boolean hasActiveTask() {
+        return accountTasks.stream().anyMatch(task -> task.getEndTime() == null);
+    }
+
+    public Optional<AccountTask> getActiveTask() {
+        return accountTasks.stream().filter(task -> task.getEndTime() == null).findFirst();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -55,10 +74,12 @@ public class Account implements UserDetails {
 
     public AccountDto toDto() {
         return AccountDto.builder()
+                .id(id)
                 .username(username)
                 .password(password)
                 .role(role)
                 .enabled(enabled)
+                .tier(tier)
                 .build();
     }
 }
