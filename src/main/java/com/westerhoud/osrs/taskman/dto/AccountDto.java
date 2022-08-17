@@ -10,7 +10,6 @@ import lombok.Data;
 public class AccountDto {
     private long id;
     private String username;
-    private String password;
     private Role role;
     private boolean enabled;
     private Tier tier;

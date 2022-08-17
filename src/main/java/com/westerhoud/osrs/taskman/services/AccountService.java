@@ -1,6 +1,7 @@
 package com.westerhoud.osrs.taskman.services;
 
 import com.westerhoud.osrs.taskman.dto.AccountDto;
+import com.westerhoud.osrs.taskman.dto.RegisterDto;
 import com.westerhoud.osrs.taskman.model.Account;
 import com.westerhoud.osrs.taskman.model.AccountTask;
 import com.westerhoud.osrs.taskman.model.Role;
@@ -19,12 +20,12 @@ public class AccountService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Account createAccount(final AccountDto account) {
+    public Account createAccount(final RegisterDto registerDto) {
         return accountRepository.save(Account.builder()
-                .username(account.getUsername())
-                .password(passwordEncoder.encode(account.getPassword()))
+                .username(registerDto.getUsername())
+                .password(passwordEncoder.encode(registerDto.getPassword()))
                 .role(Role.USER)
-                .enabled(account.isEnabled())
+                .enabled(true)
                 .tier(Tier.EASY)
                 .build());
     }

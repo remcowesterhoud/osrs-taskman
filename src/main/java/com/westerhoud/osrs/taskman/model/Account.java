@@ -76,7 +76,6 @@ public class Account implements UserDetails {
         return AccountDto.builder()
                 .id(id)
                 .username(username)
-                .password(password)
                 .role(role)
                 .enabled(enabled)
                 .tier(tier)

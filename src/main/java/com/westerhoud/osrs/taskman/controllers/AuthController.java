@@ -51,11 +51,12 @@ public class AuthController {
                     .collect(joining(" "));
 
             JwtClaimsSet claims = JwtClaimsSet.builder()
-                    .issuer("example.io")
+                    .issuer("OSRS Taskman")
                     .issuedAt(now)
                     .expiresAt(now.plusSeconds(expiry))
-                    .subject(String.format("%s,%s", account.getId(), account.getUsername()))
+                    .subject(account.getUsername())
                     .claim("roles", scope)
+                    .claim("id", account.getId())
                     .build();
 
             String token = this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
