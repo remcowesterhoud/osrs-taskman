@@ -1,6 +1,7 @@
 package com.westerhoud.osrs.taskman.controllers;
 
 import com.westerhoud.osrs.taskman.dto.AccountDto;
+import com.westerhoud.osrs.taskman.dto.LoginDto;
 import com.westerhoud.osrs.taskman.model.Account;
 import com.westerhoud.osrs.taskman.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class AuthController {
     private AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<AccountDto> login(@RequestBody AccountDto request) {
+    public ResponseEntity<AccountDto> login(@RequestBody final LoginDto request) {
         try {
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
