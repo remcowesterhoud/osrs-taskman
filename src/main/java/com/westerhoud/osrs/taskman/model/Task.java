@@ -21,6 +21,9 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private Tier tier;
     private String info;
+    private String type;
+    private String category;
+
     @OneToMany(mappedBy = "task")
     private List<AccountTask> accountTasks;
 
