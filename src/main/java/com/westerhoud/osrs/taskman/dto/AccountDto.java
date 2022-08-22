@@ -13,4 +13,6 @@ public class AccountDto {
     private Role role;
     private boolean enabled;
     private Tier tier;
+    private boolean lms;
+    private boolean official;
 }

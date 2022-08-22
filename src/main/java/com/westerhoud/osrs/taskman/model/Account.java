@@ -29,6 +29,8 @@ public class Account implements UserDetails {
     private boolean enabled;
     @Enumerated(EnumType.STRING)
     private Tier tier;
+    private boolean lms;
+    private boolean official;
     @OneToMany(mappedBy = "account")
     private List<AccountTask> accountTasks;
 

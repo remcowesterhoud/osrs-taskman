@@ -29,6 +29,8 @@ public class AccountService {
                 .role(Role.USER)
                 .enabled(true)
                 .tier(Tier.EASY)
+                .lms(registerDto.isLms())
+                .official(registerDto.isOfficial())
                 .build());
     }
 
