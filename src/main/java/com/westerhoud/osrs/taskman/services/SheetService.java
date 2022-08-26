@@ -25,8 +25,8 @@ import java.util.Random;
 @Component
 public class SheetService {
     public static final String CELL_PASSPHRASE = "'Plugin'!B1";
-    public static final String CELL_NEW_TASK = "'Dashboard'!B15";
-    public static final String CELL_NEW_TASK_IMAGE = "'Dashboard'!C15";
+    public static final String CELL_DASHBOARD_TASK = "'Dashboard'!B15";
+    public static final String CELL_DASHBOARD_IMAGE = "'Dashboard'!C15";
     public static final String CELL_INFO_CURRENT_TIER = "'Info'!B13";
     public static final String CELL_INFO_CURRENT_TASK = "'Info'!B14";
     private static final int EASY = 0;
@@ -57,7 +57,18 @@ public class SheetService {
         return pass.equals(passphrase);
     }
 
-    public SheetTask generateTask(final String spreadsheetId) throws IOException {
+    public SheetTaskDto currentTask(final String spreadsheetId) throws IOException {
+        var batchResponse = service.spreadsheets().values()
+                .batchGet(spreadsheetId)
+                .setRanges(List.of(CELL_DASHBOARD_TASK, CELL_DASHBOARD_IMAGE))
+                .setValueRenderOption("FORMULA")
+                .execute();
+        final var currentTask = (String) batchResponse.getValueRanges().get(0).getValues().get(0).get(0);
+        final var currentTaskImage = ((String) batchResponse.getValueRanges().get(1).getValues().get(0).get(0)).split("\"")[1];
+        return SheetTaskDto.builder().name(currentTask).imageUrl(currentTaskImage).build();
+    }
+
+    public SheetTaskDto generateTask(final String spreadsheetId) throws IOException {
         final String tier = getTier(spreadsheetId);
         final var sheetRange = String.format("'%s'!A2:C", tier);
 
@@ -82,8 +93,8 @@ public class SheetService {
                 new ValueRange().setRange(CELL_INFO_CURRENT_TIER).setValues(List.of(List.of(tier))),
                 new ValueRange().setRange(CELL_INFO_CURRENT_TASK).setValues(List.of(List.of("C" + newTask.rowNumber))),
                 // Update dashboard
-                new ValueRange().setRange(CELL_NEW_TASK).setValues(List.of(List.of(newTask.name))),
-                new ValueRange().setRange(CELL_NEW_TASK_IMAGE).setValues(List.of(List.of(newTask.image)))
+                new ValueRange().setRange(CELL_DASHBOARD_TASK).setValues(List.of(List.of(newTask.name))),
+                new ValueRange().setRange(CELL_DASHBOARD_IMAGE).setValues(List.of(List.of(newTask.image)))
         );
         final var batchBody = new BatchUpdateValuesRequest()
                 .setValueInputOption("USER_ENTERED")
@@ -91,7 +102,7 @@ public class SheetService {
         service.spreadsheets().values()
                 .batchUpdate(spreadsheetId, batchBody)
                 .execute();
-        return newTask;
+        return newTask.toDto();
     }
 
     public void completeTask(final String spreadsheetId) throws IOException {
@@ -106,8 +117,8 @@ public class SheetService {
                 // Complete task
                 new ValueRange().setRange(String.format("'%s'!%s", currentTier, currentTaskCell)).setValues(List.of(List.of("x"))),
                 // Update dashboard
-                new ValueRange().setRange(CELL_NEW_TASK).setValues(List.of(List.of(""))),
-                new ValueRange().setRange(CELL_NEW_TASK_IMAGE).setValues(List.of(List.of("")))
+                new ValueRange().setRange(CELL_DASHBOARD_TASK).setValues(List.of(List.of(""))),
+                new ValueRange().setRange(CELL_DASHBOARD_IMAGE).setValues(List.of(List.of("")))
         );
         final var batchBody = new BatchUpdateValuesRequest()
                 .setValueInputOption("USER_ENTERED")
@@ -163,6 +174,10 @@ public class SheetService {
         // Build flow and trigger user authorization request.
         return GoogleCredential.fromStream(in)
                 .createScoped(SCOPES);
+    }
+
+    private String getCellImageFromFormula(final String formula) {
+        return formula.split("\"")[1];
     }
 
     public record SheetTask(int rowNumber, String name, String image, boolean completed) {
