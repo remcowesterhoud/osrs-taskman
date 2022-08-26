@@ -27,6 +27,10 @@ import java.util.Random;
 
 @Component
 public class SheetService {
+    public static final String CELL_NEW_TASK = "'Dashboard'!B15";
+    public static final String CELL_NEW_TASK_IMAGE = "'Dashboard'!C15";
+    public static final String CELL_INFO_CURRENT_TIER = "'Info'!B13";
+    public static final String CELL_INFO_CURRENT_TASK = "'Info'!B14";
     private static final int EASY = 0;
     private static final int MEDIUM = 1;
     private static final int HARD = 2;
@@ -39,8 +43,6 @@ public class SheetService {
     private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
     private final Sheets service;
     private final Random random;
-    @Value("${sheets.api.serviceaccount.email}")
-    private String serviceaccountEmail;
 
     public SheetService(@Value("${sheets.api.credentials}") final String credentialsJson) throws GeneralSecurityException, IOException {
         service = new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, getCredentials(credentialsJson))
@@ -52,10 +54,6 @@ public class SheetService {
     public SheetTask generateTask(final String spreadsheetId) throws IOException {
         final String tier = getTier(spreadsheetId);
         final var sheetRange = String.format("'%s'!A2:C", tier);
-        final var cellNewTask = "'Dashboard'!B15";
-        final var cellNewTaskImage = "'Dashboard'!C15";
-        final var cellInfoCurrentTier = "'Info'!B13";
-        final var cellInfoCurrentTask = "'Info'!B14";
 
         final List<List<Object>> rows = service.spreadsheets().values()
                 .get(spreadsheetId, sheetRange)
@@ -75,11 +73,11 @@ public class SheetService {
 
         final List<ValueRange> data = List.of(
                 // Update info tab
-                new ValueRange().setRange(cellInfoCurrentTier).setValues(List.of(List.of(tier))),
-                new ValueRange().setRange(cellInfoCurrentTask).setValues(List.of(List.of("C" + newTask.rowNumber))),
+                new ValueRange().setRange(CELL_INFO_CURRENT_TIER).setValues(List.of(List.of(tier))),
+                new ValueRange().setRange(CELL_INFO_CURRENT_TASK).setValues(List.of(List.of("C" + newTask.rowNumber))),
                 // Update dashboard
-                new ValueRange().setRange(cellNewTask).setValues(List.of(List.of(newTask.name))),
-                new ValueRange().setRange(cellNewTaskImage).setValues(List.of(List.of(newTask.image)))
+                new ValueRange().setRange(CELL_NEW_TASK).setValues(List.of(List.of(newTask.name))),
+                new ValueRange().setRange(CELL_NEW_TASK_IMAGE).setValues(List.of(List.of(newTask.image)))
         );
         final var batchBody = new BatchUpdateValuesRequest()
                 .setValueInputOption("USER_ENTERED")
@@ -90,6 +88,29 @@ public class SheetService {
         return newTask;
     }
 
+    public void completeTask(final String spreadsheetId) throws IOException {
+        var batchResponse = service.spreadsheets().values()
+                .batchGet(spreadsheetId)
+                .setRanges(List.of(CELL_INFO_CURRENT_TIER, CELL_INFO_CURRENT_TASK))
+                .execute();
+        final var currentTier = batchResponse.getValueRanges().get(0).getValues().get(0).get(0);
+        final var currentTaskCell = batchResponse.getValueRanges().get(1).getValues().get(0).get(0);
+
+        final List<ValueRange> data = List.of(
+                // Complete task
+                new ValueRange().setRange(String.format("'%s'!%s", currentTier, currentTaskCell)).setValues(List.of(List.of("x"))),
+                // Update dashboard
+                new ValueRange().setRange(CELL_NEW_TASK).setValues(List.of(List.of(""))),
+                new ValueRange().setRange(CELL_NEW_TASK_IMAGE).setValues(List.of(List.of("")))
+        );
+        final var batchBody = new BatchUpdateValuesRequest()
+                .setValueInputOption("USER_ENTERED")
+                .setData(data);
+        service.spreadsheets().values()
+                .batchUpdate(spreadsheetId, batchBody)
+                .execute();
+    }
+
     /**
      * Reads the Info tab and decides the current tier of the tasker depending on completion and total counts
      *
@@ -97,21 +118,14 @@ public class SheetService {
      */
     private String getTier(final String spreadsheetId) throws IOException {
         final BatchGetValuesResponse tierProgressBatchValues;
-        try {
-            tierProgressBatchValues = service.spreadsheets().values()
-                    .batchGet(spreadsheetId)
-                    .setRanges(List.of(
-                            "'Info'!B1:B2",
-                            "'Info'!B4:B5",
-                            "'Info'!B7:B8",
-                            "'Info'!B10:B11"))
-                    .execute();
-        } catch (GoogleJsonResponseException ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Could not find spreadsheet with key %s. Please make sure you have set the" +
-                            " correct key in the configurations and that you have given editor access to %s.",
-                            spreadsheetId, serviceaccountEmail));
-        }
+        tierProgressBatchValues = service.spreadsheets().values()
+                .batchGet(spreadsheetId)
+                .setRanges(List.of(
+                        "'Info'!B1:B2",
+                        "'Info'!B4:B5",
+                        "'Info'!B7:B8",
+                        "'Info'!B10:B11"))
+                .execute();
 
         if (!hasCompletedTier(tierProgressBatchValues, EASY)) {
             return "Easy";
