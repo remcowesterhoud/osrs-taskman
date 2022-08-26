@@ -1,6 +1,6 @@
 package com.westerhoud.osrs.taskman.model;
 
-import com.westerhoud.osrs.taskman.dto.TaskDto;
+import com.westerhoud.osrs.taskman.dto.site.TaskDto;
 import lombok.*;
 
 import javax.persistence.*;

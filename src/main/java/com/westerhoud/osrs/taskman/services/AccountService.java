@@ -1,7 +1,6 @@
 package com.westerhoud.osrs.taskman.services;
 
-import com.westerhoud.osrs.taskman.dto.AccountDto;
-import com.westerhoud.osrs.taskman.dto.RegisterDto;
+import com.westerhoud.osrs.taskman.dto.site.RegisterDto;
 import com.westerhoud.osrs.taskman.model.Account;
 import com.westerhoud.osrs.taskman.model.AccountTask;
 import com.westerhoud.osrs.taskman.model.Role;

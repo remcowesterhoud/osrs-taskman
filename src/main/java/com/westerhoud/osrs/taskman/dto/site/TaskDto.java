@@ -1,4 +1,4 @@
-package com.westerhoud.osrs.taskman.dto;
+package com.westerhoud.osrs.taskman.dto.site;
 
 import com.westerhoud.osrs.taskman.model.Tier;
 import lombok.Builder;

@@ -82,6 +82,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // Public endpoints
                 .antMatchers("/login").permitAll()
                 .antMatchers("/error").permitAll()
+                .antMatchers("/sheet/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/account").permitAll()
                 // Admin endpoints
                 .antMatchers("/admin/**").hasRole(Role.ADMIN.toString())

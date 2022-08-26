@@ -1,4 +1,4 @@
-package com.westerhoud.osrs.taskman.dto;
+package com.westerhoud.osrs.taskman.dto.site;
 
 import lombok.Builder;
 import lombok.Data;

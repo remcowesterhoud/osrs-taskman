@@ -1,8 +1,8 @@
 package com.westerhoud.osrs.taskman.controllers;
 
-import com.westerhoud.osrs.taskman.dto.AccountDto;
-import com.westerhoud.osrs.taskman.dto.AccountTaskDto;
-import com.westerhoud.osrs.taskman.dto.RegisterDto;
+import com.westerhoud.osrs.taskman.dto.site.AccountDto;
+import com.westerhoud.osrs.taskman.dto.site.AccountTaskDto;
+import com.westerhoud.osrs.taskman.dto.site.RegisterDto;
 import com.westerhoud.osrs.taskman.services.AccountService;
 import com.westerhoud.osrs.taskman.services.AccountTaskService;
 import org.springframework.beans.factory.annotation.Autowired;

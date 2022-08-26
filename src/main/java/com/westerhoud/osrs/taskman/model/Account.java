@@ -1,6 +1,6 @@
 package com.westerhoud.osrs.taskman.model;
 
-import com.westerhoud.osrs.taskman.dto.AccountDto;
+import com.westerhoud.osrs.taskman.dto.site.AccountDto;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
