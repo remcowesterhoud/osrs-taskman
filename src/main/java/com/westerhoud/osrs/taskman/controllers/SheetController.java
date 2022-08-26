@@ -26,14 +26,9 @@ public class SheetController {
 
     @PostMapping("/generate")
     SheetTaskDto generateTask(@RequestBody final SheetDto sheetDto) {
-        final String spreadsheetId = sheetDto.getKey();
+        verifyAccess(sheetDto);
         try {
-            return sheetService.generateTask(spreadsheetId).toDto();
-        } catch (GoogleJsonResponseException ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Could not find spreadsheet with key %s. Please make sure you have set the" +
-                                    " correct key in the configurations and that you have given editor access to %s.",
-                            spreadsheetId, serviceaccountEmail));
+            return sheetService.generateTask(sheetDto.getKey()).toDto();
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Something went wrong. Please try again later. If the problem persists please reach out.");
@@ -42,14 +37,28 @@ public class SheetController {
 
     @PostMapping("/complete")
     void completeTask(@RequestBody final SheetDto sheetDto) {
-        final String spreadsheetId = sheetDto.getKey();
+        verifyAccess(sheetDto);
         try {
-            sheetService.completeTask(spreadsheetId);
+            sheetService.completeTask(sheetDto.getKey());
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Something went wrong. Please try again later. If the problem persists please reach out.");
+        }
+    }
+
+    void verifyAccess(final SheetDto sheetDto) {
+        try {
+            boolean validPassphrase = sheetService.hasCorrectPassphrase(sheetDto.getKey(), sheetDto.getPassphrase());
+            if (!validPassphrase) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "The passphrase configured in the plugin does not match the passhrase in the spreadsheet. " +
+                                "You are not allowed to modify this spreadsheet.");
+            }
         } catch (GoogleJsonResponseException ex) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Could not find spreadsheet with key %s. Please make sure you have set the" +
                                     " correct key in the configurations and that you have given editor access to %s.",
-                            spreadsheetId, serviceaccountEmail));
+                            sheetDto.getKey(), serviceaccountEmail));
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Something went wrong. Please try again later. If the problem persists please reach out.");

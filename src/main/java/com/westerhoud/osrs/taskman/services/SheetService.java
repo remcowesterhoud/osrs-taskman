@@ -3,7 +3,6 @@ package com.westerhoud.osrs.taskman.services;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
@@ -13,9 +12,7 @@ import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.westerhoud.osrs.taskman.dto.sheet.SheetTaskDto;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,6 +24,7 @@ import java.util.Random;
 
 @Component
 public class SheetService {
+    public static final String CELL_PASSPHRASE = "'Plugin'!B1";
     public static final String CELL_NEW_TASK = "'Dashboard'!B15";
     public static final String CELL_NEW_TASK_IMAGE = "'Dashboard'!C15";
     public static final String CELL_INFO_CURRENT_TIER = "'Info'!B13";
@@ -49,6 +47,14 @@ public class SheetService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         random = new Random();
+    }
+
+    public boolean hasCorrectPassphrase(final String spreadsheetId, final String passphrase) throws IOException {
+        String pass = (String) service.spreadsheets().values().get(spreadsheetId, CELL_PASSPHRASE).execute()
+                .getValues()
+                .get(0)
+                .get(0);
+        return pass.equals(passphrase);
     }
 
     public SheetTask generateTask(final String spreadsheetId) throws IOException {

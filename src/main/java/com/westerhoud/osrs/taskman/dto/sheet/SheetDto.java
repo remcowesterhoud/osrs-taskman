@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SheetDto {
     private String key;
+    private String passphrase;
 }
