@@ -10,7 +10,10 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.BatchGetValuesResponse;
 import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import com.westerhoud.osrs.taskman.dto.sheet.ProgressDto;
+import com.westerhoud.osrs.taskman.dto.sheet.SheetProgressDto;
 import com.westerhoud.osrs.taskman.dto.sheet.SheetTaskDto;
+import com.westerhoud.osrs.taskman.model.Tier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class SheetService {
@@ -69,7 +70,7 @@ public class SheetService {
     }
 
     public SheetTaskDto generateTask(final String spreadsheetId) throws IOException {
-        final String tier = getTier(spreadsheetId);
+        final String tier = progress(spreadsheetId).getCurrentTier();
         final var sheetRange = String.format("'%s'!A2:C", tier);
 
         final List<List<Object>> rows = service.spreadsheets().values()
@@ -133,7 +134,7 @@ public class SheetService {
      *
      * @return The name of the sheet of the tasker's tier
      */
-    private String getTier(final String spreadsheetId) throws IOException {
+    public SheetProgressDto progress(final String spreadsheetId) throws IOException {
         final BatchGetValuesResponse tierProgressBatchValues;
         tierProgressBatchValues = service.spreadsheets().values()
                 .batchGet(spreadsheetId)
@@ -144,22 +145,18 @@ public class SheetService {
                         "'Info'!B10:B11"))
                 .execute();
 
-        if (!hasCompletedTier(tierProgressBatchValues, EASY)) {
-            return "Easy";
-        } else if (!hasCompletedTier(tierProgressBatchValues, MEDIUM)) {
-            return "Medium";
-        } else if (!hasCompletedTier(tierProgressBatchValues, HARD)) {
-            return "Hard";
-        } else if (!hasCompletedTier(tierProgressBatchValues, ELITE)) {
-            return "Elite";
-        }
-        return "Extra";
+        final Map<String, ProgressDto> progress = new HashMap<>();
+        progress.put(Tier.EASY.getName(), createProgressDto(tierProgressBatchValues, EASY));
+        progress.put(Tier.MEDIUM.getName(), createProgressDto(tierProgressBatchValues, MEDIUM));
+        progress.put(Tier.HARD.getName(), createProgressDto(tierProgressBatchValues, HARD));
+        progress.put(Tier.ELITE.getName(), createProgressDto(tierProgressBatchValues, ELITE));
+        return SheetProgressDto.builder().progressByTier(progress).build();
     }
 
-    private boolean hasCompletedTier(final BatchGetValuesResponse tierProgressBatchValues, final int tier) {
-        var total = tierProgressBatchValues.getValueRanges().get(tier).getValues().get(0).get(0);
-        var completed = tierProgressBatchValues.getValueRanges().get(tier).getValues().get(1).get(0);
-        return total.equals(completed);
+    private ProgressDto createProgressDto(final BatchGetValuesResponse tierProgressBatchValues, final int tier) {
+        var total = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(0).get(0));
+        var completed = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(1).get(0));
+        return ProgressDto.builder().maxValue(total).value(completed).build();
     }
 
     /**

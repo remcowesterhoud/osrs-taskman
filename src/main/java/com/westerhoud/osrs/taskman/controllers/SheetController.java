@@ -2,6 +2,7 @@ package com.westerhoud.osrs.taskman.controllers;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.westerhoud.osrs.taskman.dto.sheet.SheetDto;
+import com.westerhoud.osrs.taskman.dto.sheet.SheetProgressDto;
 import com.westerhoud.osrs.taskman.dto.sheet.SheetTaskDto;
 import com.westerhoud.osrs.taskman.services.SheetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,14 @@ import java.io.IOException;
 @RequestMapping("/sheet")
 public class SheetController {
 
+    public static final SheetTaskDto TAKS_GENERATE_DTO = SheetTaskDto.builder()
+            .name("Generate a task!")
+            .imageUrl("https://oldschool.runescape.wiki/images/Mystery_box.png?246bf")
+            .build();
+    public static final SheetTaskDto TASK_COMPLETE_DTO = SheetTaskDto.builder()
+            .name("Task complete!")
+            .imageUrl("https://oldschool.runescape.wiki/images/Birthday_balloons.png?356fd")
+            .build();
     @Autowired
     private SheetService sheetService;
     @Value("${sheets.api.serviceaccount.email}")
@@ -29,6 +38,9 @@ public class SheetController {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Something went wrong. Please try again later. If the problem persists please reach out.");
+        } catch (NullPointerException e) {
+            // No current task
+            return TAKS_GENERATE_DTO;
         }
     }
 
@@ -44,10 +56,22 @@ public class SheetController {
     }
 
     @PostMapping("/complete")
-    void completeTask(@RequestBody final SheetDto sheetDto) {
+    SheetTaskDto completeTask(@RequestBody final SheetDto sheetDto) {
         verifyAccess(sheetDto.getKey(), sheetDto.getPassphrase());
         try {
             sheetService.completeTask(sheetDto.getKey());
+            return TASK_COMPLETE_DTO;
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Something went wrong. Please try again later. If the problem persists please reach out.");
+        }
+    }
+
+    @GetMapping("/progress")
+    SheetProgressDto sheetProgress(@RequestParam final String key, @RequestParam final String passphrase) {
+        verifyAccess(key, passphrase);
+        try {
+            return sheetService.progress(key);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Something went wrong. Please try again later. If the problem persists please reach out.");
