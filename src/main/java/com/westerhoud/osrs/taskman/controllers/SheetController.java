@@ -1,10 +1,12 @@
 package com.westerhoud.osrs.taskman.controllers;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.westerhoud.osrs.taskman.dto.sheet.SheetDto;
 import com.westerhoud.osrs.taskman.dto.sheet.SheetProgressDto;
 import com.westerhoud.osrs.taskman.dto.sheet.SheetTaskDto;
 import com.westerhoud.osrs.taskman.services.SheetService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/sheet")
+@Slf4j
 public class SheetController {
 
     public static final SheetTaskDto TAKS_GENERATE_DTO = SheetTaskDto.builder()
@@ -27,17 +30,12 @@ public class SheetController {
             .build();
     @Autowired
     private SheetService sheetService;
-    @Value("${sheets.api.serviceaccount.email}")
-    private String serviceaccountEmail;
 
     @GetMapping("/current")
-    SheetTaskDto currentTask(@RequestParam final String key, @RequestParam final String passphrase) {
+    SheetTaskDto currentTask(@RequestParam final String key, @RequestParam final String passphrase) throws IOException {
         verifyAccess(key, passphrase);
         try {
             return sheetService.currentTask(key);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Something went wrong. Please try again later. If the problem persists please reach out.");
         } catch (NullPointerException e) {
             // No current task
             return TAKS_GENERATE_DTO;
@@ -45,55 +43,30 @@ public class SheetController {
     }
 
     @PostMapping("/generate")
-    SheetTaskDto generateTask(@RequestBody final SheetDto sheetDto) {
+    SheetTaskDto generateTask(@RequestBody final SheetDto sheetDto) throws IOException {
         verifyAccess(sheetDto.getKey(), sheetDto.getPassphrase());
-        try {
-            return sheetService.generateTask(sheetDto.getKey());
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Something went wrong. Please try again later. If the problem persists please reach out.");
-        }
+        return sheetService.generateTask(sheetDto.getKey());
     }
 
     @PostMapping("/complete")
-    SheetTaskDto completeTask(@RequestBody final SheetDto sheetDto) {
+    SheetTaskDto completeTask(@RequestBody final SheetDto sheetDto) throws IOException {
         verifyAccess(sheetDto.getKey(), sheetDto.getPassphrase());
-        try {
-            sheetService.completeTask(sheetDto.getKey());
-            return TASK_COMPLETE_DTO;
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Something went wrong. Please try again later. If the problem persists please reach out.");
-        }
+        sheetService.completeTask(sheetDto.getKey());
+        return TASK_COMPLETE_DTO;
     }
 
     @GetMapping("/progress")
-    SheetProgressDto sheetProgress(@RequestParam final String key, @RequestParam final String passphrase) {
+    SheetProgressDto sheetProgress(@RequestParam final String key, @RequestParam final String passphrase) throws IOException {
         verifyAccess(key, passphrase);
-        try {
-            return sheetService.progress(key);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Something went wrong. Please try again later. If the problem persists please reach out.");
-        }
+        return sheetService.progress(key);
     }
 
-    void verifyAccess(final String key, final String passphrase) {
-        try {
-            boolean validPassphrase = sheetService.hasCorrectPassphrase(key, passphrase);
-            if (!validPassphrase) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "The passphrase configured in the plugin does not match the passhrase in the spreadsheet. " +
-                                "You are not allowed to modify this spreadsheet.");
-            }
-        } catch (GoogleJsonResponseException ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Could not find spreadsheet with key %s. Please make sure you have set the" +
-                                    " correct key in the configurations and that you have given editor access to %s.",
-                            key, serviceaccountEmail));
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Something went wrong. Please try again later. If the problem persists please reach out.");
+    void verifyAccess(final String key, final String passphrase) throws IOException {
+        boolean validPassphrase = sheetService.hasCorrectPassphrase(key, passphrase);
+        if (!validPassphrase) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "The passphrase configured in the plugin does not match the passhrase in the spreadsheet. " +
+                            "You are not allowed to modify this spreadsheet.");
         }
     }
 }
