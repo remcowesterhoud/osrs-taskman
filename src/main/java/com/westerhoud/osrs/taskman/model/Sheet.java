@@ -1,4 +1,4 @@
-package com.westerhoud.osrs.taskman.dto.sheet;
+package com.westerhoud.osrs.taskman.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SheetDto {
+public class Sheet {
     private String key;
     private String passphrase;
 }

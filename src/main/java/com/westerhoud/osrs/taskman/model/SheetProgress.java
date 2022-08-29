@@ -1,6 +1,5 @@
-package com.westerhoud.osrs.taskman.dto.sheet;
+package com.westerhoud.osrs.taskman.model;
 
-import com.westerhoud.osrs.taskman.model.Tier;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,8 +7,8 @@ import java.util.Map;
 
 @Data
 @Builder
-public class SheetProgressDto {
-    final Map<String, ProgressDto> progressByTier;
+public class SheetProgress {
+    final Map<String, Progress> progressByTier;
 
     public String getCurrentTier() {
         if (progressByTier.get(Tier.EASY.getName()).isIncomplete()) {

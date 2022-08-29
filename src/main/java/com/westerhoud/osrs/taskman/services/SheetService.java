@@ -10,9 +10,8 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.BatchGetValuesResponse;
 import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
 import com.google.api.services.sheets.v4.model.ValueRange;
-import com.westerhoud.osrs.taskman.dto.sheet.ProgressDto;
-import com.westerhoud.osrs.taskman.dto.sheet.SheetProgressDto;
-import com.westerhoud.osrs.taskman.dto.sheet.SheetTaskDto;
+import com.westerhoud.osrs.taskman.model.Progress;
+import com.westerhoud.osrs.taskman.model.SheetProgress;
 import com.westerhoud.osrs.taskman.model.Tier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -58,7 +57,7 @@ public class SheetService {
         return pass.equals(passphrase);
     }
 
-    public SheetTaskDto currentTask(final String spreadsheetId) throws IOException {
+    public com.westerhoud.osrs.taskman.model.SheetTask currentTask(final String spreadsheetId) throws IOException {
         var batchResponse = service.spreadsheets().values()
                 .batchGet(spreadsheetId)
                 .setRanges(List.of(CELL_DASHBOARD_TASK, CELL_DASHBOARD_IMAGE))
@@ -66,10 +65,10 @@ public class SheetService {
                 .execute();
         final var currentTask = (String) batchResponse.getValueRanges().get(0).getValues().get(0).get(0);
         final var currentTaskImage = ((String) batchResponse.getValueRanges().get(1).getValues().get(0).get(0)).split("\"")[1];
-        return SheetTaskDto.builder().name(currentTask).imageUrl(currentTaskImage).build();
+        return com.westerhoud.osrs.taskman.model.SheetTask.builder().name(currentTask).imageUrl(currentTaskImage).build();
     }
 
-    public SheetTaskDto generateTask(final String spreadsheetId) throws IOException {
+    public com.westerhoud.osrs.taskman.model.SheetTask generateTask(final String spreadsheetId) throws IOException {
         final String tier = progress(spreadsheetId).getCurrentTier();
         final var sheetRange = String.format("'%s'!A2:C", tier);
 
@@ -134,7 +133,7 @@ public class SheetService {
      *
      * @return The name of the sheet of the tasker's tier
      */
-    public SheetProgressDto progress(final String spreadsheetId) throws IOException {
+    public SheetProgress progress(final String spreadsheetId) throws IOException {
         final BatchGetValuesResponse tierProgressBatchValues;
         tierProgressBatchValues = service.spreadsheets().values()
                 .batchGet(spreadsheetId)
@@ -145,18 +144,18 @@ public class SheetService {
                         "'Info'!B10:B11"))
                 .execute();
 
-        final Map<String, ProgressDto> progress = new HashMap<>();
+        final Map<String, Progress> progress = new HashMap<>();
         progress.put(Tier.EASY.getName(), createProgressDto(tierProgressBatchValues, EASY));
         progress.put(Tier.MEDIUM.getName(), createProgressDto(tierProgressBatchValues, MEDIUM));
         progress.put(Tier.HARD.getName(), createProgressDto(tierProgressBatchValues, HARD));
         progress.put(Tier.ELITE.getName(), createProgressDto(tierProgressBatchValues, ELITE));
-        return SheetProgressDto.builder().progressByTier(progress).build();
+        return SheetProgress.builder().progressByTier(progress).build();
     }
 
-    private ProgressDto createProgressDto(final BatchGetValuesResponse tierProgressBatchValues, final int tier) {
+    private Progress createProgressDto(final BatchGetValuesResponse tierProgressBatchValues, final int tier) {
         var total = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(0).get(0));
         var completed = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(1).get(0));
-        return ProgressDto.builder().maxValue(total).value(completed).build();
+        return Progress.builder().maxValue(total).value(completed).build();
     }
 
     /**
@@ -182,8 +181,8 @@ public class SheetService {
             return image.split("\"")[1];
         }
 
-        public SheetTaskDto toDto() {
-            return SheetTaskDto.builder()
+        public com.westerhoud.osrs.taskman.model.SheetTask toDto() {
+            return com.westerhoud.osrs.taskman.model.SheetTask.builder()
                     .name(name)
                     .imageUrl(getImageUrl())
                     .build();
