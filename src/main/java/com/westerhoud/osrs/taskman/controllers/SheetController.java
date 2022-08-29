@@ -33,7 +33,6 @@ public class SheetController {
 
     @GetMapping("/current")
     SheetTaskDto currentTask(@RequestParam final String key, @RequestParam final String passphrase) throws IOException {
-        verifyAccess(key, passphrase);
         try {
             return sheetService.currentTask(key);
         } catch (NullPointerException e) {
@@ -57,7 +56,6 @@ public class SheetController {
 
     @GetMapping("/progress")
     SheetProgressDto sheetProgress(@RequestParam final String key, @RequestParam final String passphrase) throws IOException {
-        verifyAccess(key, passphrase);
         return sheetService.progress(key);
     }
 
