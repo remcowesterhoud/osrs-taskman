@@ -29,7 +29,7 @@ public class SheetController {
     private SheetService sheetService;
 
     @GetMapping("/current")
-    SheetTask currentTask(@RequestParam final String key, @RequestParam final String passphrase) throws IOException {
+    SheetTask currentTask(@RequestParam final String key) throws IOException {
         try {
             return sheetService.currentTask(key);
         } catch (NullPointerException e) {
@@ -52,7 +52,7 @@ public class SheetController {
     }
 
     @GetMapping("/progress")
-    SheetProgress sheetProgress(@RequestParam final String key, @RequestParam final String passphrase) throws IOException {
+    SheetProgress sheetProgress(@RequestParam final String key) throws IOException {
         return sheetService.progress(key);
     }
 
