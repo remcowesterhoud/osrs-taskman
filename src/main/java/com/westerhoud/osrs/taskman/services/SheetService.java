@@ -13,14 +13,17 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import com.westerhoud.osrs.taskman.model.Progress;
 import com.westerhoud.osrs.taskman.model.SheetProgress;
 import com.westerhoud.osrs.taskman.model.Tier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SheetService {
@@ -50,7 +53,7 @@ public class SheetService {
     }
 
     public boolean hasCorrectPassphrase(final String spreadsheetId, final String passphrase) throws IOException {
-        String pass = (String) service.spreadsheets().values().get(spreadsheetId, CELL_PASSPHRASE).execute()
+        final String pass = (String) service.spreadsheets().values().get(spreadsheetId, CELL_PASSPHRASE).execute()
                 .getValues()
                 .get(0)
                 .get(0);
@@ -58,7 +61,7 @@ public class SheetService {
     }
 
     public com.westerhoud.osrs.taskman.model.SheetTask currentTask(final String spreadsheetId) throws IOException {
-        var batchResponse = service.spreadsheets().values()
+        final var batchResponse = service.spreadsheets().values()
                 .batchGet(spreadsheetId)
                 .setRanges(List.of(CELL_DASHBOARD_TASK, CELL_DASHBOARD_IMAGE))
                 .setValueRenderOption("FORMULA")
@@ -106,7 +109,7 @@ public class SheetService {
     }
 
     public void completeTask(final String spreadsheetId) throws IOException {
-        var batchResponse = service.spreadsheets().values()
+        final var batchResponse = service.spreadsheets().values()
                 .batchGet(spreadsheetId)
                 .setRanges(List.of(CELL_INFO_CURRENT_TIER, CELL_INFO_CURRENT_TASK))
                 .execute();
@@ -153,8 +156,8 @@ public class SheetService {
     }
 
     private Progress createProgressDto(final BatchGetValuesResponse tierProgressBatchValues, final int tier) {
-        var total = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(0).get(0));
-        var completed = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(1).get(0));
+        final var total = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(0).get(0));
+        final var completed = Integer.parseInt((String) tierProgressBatchValues.getValueRanges().get(tier).getValues().get(1).get(0));
         return Progress.builder().maxValue(total).value(completed).build();
     }
 
@@ -166,7 +169,7 @@ public class SheetService {
      */
     private Credential getCredentials(final String credentialsJson) throws IOException {
         // Load client secrets.
-        InputStream in = new ByteArrayInputStream(credentialsJson.getBytes());
+        final InputStream in = new ByteArrayInputStream(credentialsJson.getBytes());
         // Build flow and trigger user authorization request.
         return GoogleCredential.fromStream(in)
                 .createScoped(SCOPES);
