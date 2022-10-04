@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Sheet {
-    private String key;
-    private String passphrase;
+public class Credentials {
+  private String identifier;
+  private String password;
 }
