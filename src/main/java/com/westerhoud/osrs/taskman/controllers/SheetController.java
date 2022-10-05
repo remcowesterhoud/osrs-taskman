@@ -2,6 +2,7 @@ package com.westerhoud.osrs.taskman.controllers;
 
 import com.westerhoud.osrs.taskman.model.Credentials;
 import com.westerhoud.osrs.taskman.model.OverallProgress;
+import com.westerhoud.osrs.taskman.model.SheetCredentials;
 import com.westerhoud.osrs.taskman.model.Task;
 import com.westerhoud.osrs.taskman.services.SheetService;
 import java.io.IOException;
@@ -45,13 +46,15 @@ public class SheetController {
   }
 
   @PostMapping("/generate")
-  Task generateTask(@RequestBody final Credentials credentials) throws IOException {
+  Task generateTask(@RequestBody final SheetCredentials sheetCredentials) throws IOException {
+    final var credentials = sheetCredentials.toCredentials();
     verifyAccess(credentials.getIdentifier(), credentials.getPassword());
     return sheetService.generateTask(credentials);
   }
 
   @PostMapping("/complete")
-  Task completeTask(@RequestBody final Credentials credentials) throws IOException {
+  Task completeTask(@RequestBody final SheetCredentials sheetCredentials) throws IOException {
+    final var credentials = sheetCredentials.toCredentials();
     verifyAccess(credentials.getIdentifier(), credentials.getPassword());
     sheetService.completeTask(credentials);
     return TASK_COMPLETE_DTO;
