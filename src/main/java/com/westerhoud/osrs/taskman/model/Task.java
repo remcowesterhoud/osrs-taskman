@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class SheetTask {
-    private String name;
-    private String imageUrl;
+public class Task {
+  private String name;
+  private String imageUrl;
 }
