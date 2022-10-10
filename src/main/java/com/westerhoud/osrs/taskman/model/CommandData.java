@@ -9,12 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Deprecated(forRemoval = true)
-public class SheetCredentials {
-  private String key;
-  private String passphrase;
-
-  public Credentials toCredentials() {
-    return new Credentials(key, passphrase);
-  }
+public class CommandData {
+  private Task task;
+  private String tier;
+  private int progressPercentage;
 }
