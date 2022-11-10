@@ -49,6 +49,7 @@ public class TaskController {
       @RequestHeader(TASKMAN_SOURCE_HEADER) final TaskSource source,
       @RequestHeader(name = TASKMAN_RSN_HEADER, required = false) final String rsn)
       throws IOException {
+    log.info("getting task for {}", rsn);
     try {
       final Task task = getService(source).currentTask(new Credentials(identifier, password));
       if (rsn != null) {
@@ -68,6 +69,7 @@ public class TaskController {
       @RequestHeader(TASKMAN_SOURCE_HEADER) final TaskSource source,
       @RequestHeader(name = TASKMAN_RSN_HEADER, required = false) final String rsn)
       throws IOException {
+    log.info("generating task for {}", rsn);
     final Task task = getService(source).generateTask(credentials);
     if (rsn != null) {
       commandDataStore.addTask(rsn, task);
@@ -81,6 +83,7 @@ public class TaskController {
       @RequestHeader(TASKMAN_SOURCE_HEADER) final TaskSource source,
       @RequestHeader(name = TASKMAN_RSN_HEADER, required = false) final String rsn)
       throws IOException {
+    log.info("completing task for {}", rsn);
     getService(source).completeTask(credentials);
     if (rsn != null) {
       commandDataStore.addTask(rsn, TASK_COMPLETE_DTO);
@@ -95,6 +98,7 @@ public class TaskController {
       @RequestHeader(TASKMAN_SOURCE_HEADER) final TaskSource source,
       @RequestHeader(name = TASKMAN_RSN_HEADER, required = false) final String rsn)
       throws IOException {
+    log.info("getting info for {}", rsn);
     final OverallProgress progress = getService(source).progress(new Credentials(identifier, password));
     if (rsn != null) {
       commandDataStore.addProgress(rsn, progress);
@@ -104,6 +108,7 @@ public class TaskController {
 
   @GetMapping("/command/{rsn}")
   CommandData commandData(@PathVariable final String rsn) {
+    log.info("getting command data for {}", rsn);
     return commandDataStore.getData(rsn);
   }
 
