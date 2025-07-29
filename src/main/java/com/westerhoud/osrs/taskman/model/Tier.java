@@ -1,5 +1,6 @@
 package com.westerhoud.osrs.taskman.model;
 
+import java.util.Arrays;
 import lombok.Getter;
 
 public enum Tier {
@@ -7,6 +8,7 @@ public enum Tier {
     MEDIUM("Medium"),
     HARD("Hard"),
     ELITE("Elite"),
+    MASTER("Master"),
     PETS("Pets"),
     PASSIVE("Passive"),
     EXTRA("Extra");
@@ -22,9 +24,15 @@ public enum Tier {
             case EASY -> MEDIUM;
             case MEDIUM -> HARD;
             case HARD -> ELITE;
-            case ELITE -> PETS;
+            case ELITE -> MASTER;
+            case MASTER -> PETS;
             case PETS -> PASSIVE;
             case PASSIVE, EXTRA -> EXTRA;
         };
+    }
+
+    public static boolean exists(String name) {
+        return Arrays.stream(Tier.values())
+            .anyMatch(tier -> tier.getName().equalsIgnoreCase(name));
     }
 }
