@@ -63,7 +63,7 @@ public class TaskController {
       return task;
     } catch (final NullPointerException e) {
       // No current task
-      log.info(String.format("No current task for rsn %s: ", rsn), e);
+      log.info("No current task for rsn {}", rsn);
       return TAKS_GENERATE_DTO;
     }
   }
