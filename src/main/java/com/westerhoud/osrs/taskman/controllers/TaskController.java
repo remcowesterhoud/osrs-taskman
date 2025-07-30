@@ -121,6 +121,10 @@ public class TaskController {
   ResponseEntity<?> setCommandData(@PathVariable final String rsn, @RequestBody final CollectionLogMasterCommandData commandData) {
     log.info("setting command data for {}: {}", rsn, commandData);
 
+    if (rsn == null) {
+     return ResponseEntity.badRequest().body("No rsn provided");
+    }
+
     final String tier = commandData.getTier();
     if (!Tier.exists(tier)) {
       log.warn("Received request with tier {} for rsn {}, but tier does not exist", tier, rsn);
@@ -134,7 +138,11 @@ public class TaskController {
     }
 
     try {
-      commandDataStore.setCollectionLogMasterCommandData(rsn, commandData);
+      if (commandData.getTaskId().equalsIgnoreCase("complete")) {
+        commandDataStore.addTask(rsn, TASK_COMPLETE_DTO);
+      } else {
+        commandDataStore.setCollectionLogMasterCommandData(rsn, commandData);
+      }
       return ResponseEntity.ok().build();
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
