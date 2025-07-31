@@ -56,14 +56,6 @@ public class SheetService implements TaskService {
         random = new Random();
     }
 
-    public boolean hasCorrectPassphrase(final String spreadsheetId, final String passphrase) throws IOException {
-        final String pass = (String) service.spreadsheets().values().get(spreadsheetId, CELL_PASSPHRASE).execute()
-                .getValues()
-                .get(0)
-                .get(0);
-        return pass.equals(passphrase);
-    }
-
     @Override
     public String authenticate(final Credentials credentials) throws IOException {
         final String pass = (String) service.spreadsheets().values().get(credentials.getIdentifier(), CELL_PASSPHRASE).execute()
