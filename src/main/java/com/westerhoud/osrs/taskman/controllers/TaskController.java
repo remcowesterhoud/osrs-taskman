@@ -46,6 +46,7 @@ public class TaskController {
   @Autowired private SheetService sheetService;
   @Autowired private WebsiteService websiteService;
   @Autowired private CommandDataStore commandDataStore;
+  @Autowired private TaskListService taskListService;
 
   @GetMapping("/current")
   Task currentTask(
@@ -137,16 +138,20 @@ public class TaskController {
       return ResponseEntity.badRequest().body("Progress percentage must be 0-100");
     }
 
-    try {
-      if (commandData.getTaskId().equalsIgnoreCase("complete")) {
-        commandDataStore.addTask(rsn, TASK_COMPLETE_DTO);
-      } else {
-        commandDataStore.setCollectionLogMasterCommandData(rsn, commandData);
+    final String taskName;
+    if (commandData.getTaskId().equalsIgnoreCase("complete")) {
+      taskName = TASK_COMPLETE_DTO.getName();
+    } else {
+      final var taskNameOpt = taskListService.getTaskName(commandData.getTaskId());
+      if (taskNameOpt.isEmpty()) {
+        final var error = "Could not find task for id %s\nReceived data: %s".formatted(commandData.getTaskId(), commandData);
+        log.error(error);
+        return ResponseEntity.badRequest().body(error);
       }
-      return ResponseEntity.ok().build();
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+      taskName = taskNameOpt.get();
     }
+    commandDataStore.setCollectionLogMasterCommandData(rsn, taskName, commandData.getTier(), commandData.getProgressPercentage());
+    return ResponseEntity.ok().build();
   }
 
   private TaskService getService(final TaskSource source) {

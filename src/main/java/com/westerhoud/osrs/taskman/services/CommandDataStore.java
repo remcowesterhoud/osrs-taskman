@@ -20,12 +20,7 @@ import org.springframework.stereotype.Component;
 public class CommandDataStore {
 
   private static final String MISSING_TASK_IMAGE_URL = "https://oldschool.runescape.wiki/images/Cake_of_guidance_detail.png?c3595";
-  private final TaskListService taskListService;
   private final Map<String, CommandData> taskByRsn = new ConcurrentHashMap<>();
-
-  public CommandDataStore(@Autowired  final TaskListService taskListService) {
-    this.taskListService = taskListService;
-  }
 
   public void addTask(final String rsn, final Task task) {
     final var data = getCommandDataForRsn(rsn);
@@ -45,24 +40,6 @@ public class CommandDataStore {
     return taskByRsn.get(rsn);
   }
 
-  public void setCollectionLogMasterCommandData(final String rsn, final CollectionLogMasterCommandData commandData) {
-    final var data = getCommandDataForRsn(rsn);
-    final var taskName = taskListService.getTaskName(commandData.getTaskId());
-
-    if (taskName.isEmpty()) {
-      final var error = "Could not find task for id %s\nReceived data: %s".formatted(commandData.getTaskId(), commandData);
-      log.error(error);
-      throw new IllegalArgumentException(error);
-    }
-
-    data.setTask(Task.builder()
-      .name(taskName.get())
-      .imageUrl(MISSING_TASK_IMAGE_URL) // Not used in the Collection Log Master plugin
-      .build());
-    data.setTier(commandData.getTier());
-    data.setProgressPercentage(commandData.getProgressPercentage());
-  }
-
   private CommandData getCommandDataForRsn(final String rsn) {
     CommandData data = taskByRsn.get(rsn);
     if (data == null) {
@@ -70,5 +47,16 @@ public class CommandDataStore {
       taskByRsn.put(rsn, data);
     }
     return data;
+  }
+
+  public void setCollectionLogMasterCommandData(final String rsn, final String name, final String tier,
+      final int progressPercentage) {
+    final var data = getCommandDataForRsn(rsn);
+    data.setTask(Task.builder()
+        .name(name)
+        .imageUrl(MISSING_TASK_IMAGE_URL) // Not used in the Collection Log Master plugin
+        .build());
+    data.setTier(tier);
+    data.setProgressPercentage(progressPercentage);
   }
 }
