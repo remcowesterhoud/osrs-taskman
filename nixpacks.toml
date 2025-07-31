@@ -1,2 +1,0 @@
-[phases.setup]
-environment = { JVM_OPTS = "-Xmx100m -Xms50m" }
