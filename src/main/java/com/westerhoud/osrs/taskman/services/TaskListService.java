@@ -31,7 +31,7 @@ public class TaskListService {
     fetchTasks();
   }
 
-  @Scheduled(cron = "0 0,15,30,45 * * * *")
+  @Scheduled(cron = "0 0 * * * *")
   public void fetchTasks() {
     final String tracingId = String.valueOf(UUID.randomUUID());
     log.info("Fetching task list: {}", tracingId);
