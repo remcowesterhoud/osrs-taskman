@@ -8,4 +8,5 @@ import lombok.Data;
 public class Task {
   private String name;
   private String imageUrl;
+  private String tip;
 }

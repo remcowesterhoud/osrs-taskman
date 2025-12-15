@@ -37,11 +37,13 @@ public class TaskController {
       Task.builder()
           .name("Generate a task!")
           .imageUrl("https://oldschool.runescape.wiki/images/Mystery_box.png?246bf")
+          .tip("Click the generate button for a new task.")
           .build();
   public static final Task TASK_COMPLETE_DTO =
       Task.builder()
           .name("Task complete!")
           .imageUrl("https://oldschool.runescape.wiki/images/Birthday_balloons.png?356fd")
+          .tip("Click the generate button for a new task.")
           .build();
   @Autowired private SheetService sheetService;
   @Autowired private WebsiteService websiteService;
@@ -105,7 +107,8 @@ public class TaskController {
       @RequestHeader(name = TASKMAN_RSN_HEADER, required = false) final String rsn)
       throws IOException {
     log.info("getting info for {}", rsn);
-    final OverallProgress progress = getService(source).progress(new Credentials(identifier, password));
+    final OverallProgress progress =
+        getService(source).progress(new Credentials(identifier, password));
     if (rsn != null) {
       commandDataStore.addProgress(rsn, progress);
     }
@@ -119,11 +122,13 @@ public class TaskController {
   }
 
   @PutMapping("/command/{rsn}")
-  ResponseEntity<?> setCommandData(@PathVariable final String rsn, @RequestBody final CollectionLogMasterCommandData commandData) {
+  ResponseEntity<?> setCommandData(
+      @PathVariable final String rsn,
+      @RequestBody final CollectionLogMasterCommandData commandData) {
     log.info("setting command data for {}: {}", rsn, commandData);
 
     if (rsn == null) {
-     return ResponseEntity.badRequest().body("No rsn provided");
+      return ResponseEntity.badRequest().body("No rsn provided");
     }
 
     final String tier = commandData.getTier();
@@ -144,13 +149,16 @@ public class TaskController {
     } else {
       final var taskNameOpt = taskListService.getTaskName(commandData.getTaskId());
       if (taskNameOpt.isEmpty()) {
-        final var error = "Could not find task for id %s\nReceived data: %s".formatted(commandData.getTaskId(), commandData);
+        final var error =
+            "Could not find task for id %s\nReceived data: %s"
+                .formatted(commandData.getTaskId(), commandData);
         log.error(error);
         return ResponseEntity.badRequest().body(error);
       }
       taskName = taskNameOpt.get();
     }
-    commandDataStore.setCollectionLogMasterCommandData(rsn, taskName, commandData.getTier(), commandData.getProgressPercentage());
+    commandDataStore.setCollectionLogMasterCommandData(
+        rsn, taskName, commandData.getTier(), commandData.getProgressPercentage());
     return ResponseEntity.ok().build();
   }
 

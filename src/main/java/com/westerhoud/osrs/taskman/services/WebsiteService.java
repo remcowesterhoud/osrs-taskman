@@ -163,7 +163,11 @@ public class WebsiteService implements TaskService {
     private WebsiteTask message;
 
     public Task toTask() {
-      return Task.builder().name(message.getTaskName()).imageUrl(message.getTaskImage()).build();
+      return Task.builder()
+          .name(message.getTaskName())
+          .imageUrl(message.getTaskImage())
+          .tip(message.getTaskTip())
+          .build();
     }
   }
 
@@ -171,8 +175,10 @@ public class WebsiteService implements TaskService {
   @NoArgsConstructor
   @Data
   private class WebsiteTask {
+    private String taskId;
     private String taskName;
     private String taskImage;
+    private String taskTip;
   }
 
   @AllArgsConstructor
