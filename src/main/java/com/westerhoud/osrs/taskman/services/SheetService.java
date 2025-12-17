@@ -98,6 +98,7 @@ public class SheetService implements TaskService {
     final var currentTaskImage =
         ((String) batchResponse.getValueRanges().get(1).getValues().get(0).get(0)).split("\"")[1];
     return Task.builder()
+        .id(null)
         .name(currentTask)
         .imageUrl(currentTaskImage)
         .tip("For tips, switch to the website!")
@@ -240,6 +241,7 @@ public class SheetService implements TaskService {
 
     public Task toDto() {
       return Task.builder()
+          .id(null)
           .name(name)
           .imageUrl(getImageUrl())
           .tip("For tips, switch to the website!")

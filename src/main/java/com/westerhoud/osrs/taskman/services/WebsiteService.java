@@ -164,6 +164,7 @@ public class WebsiteService implements TaskService {
 
     public Task toTask() {
       return Task.builder()
+          .id(message.getTaskId())
           .name(message.getTaskName())
           .imageUrl(message.getTaskImage())
           .tip(message.getTaskTip())

@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class Task {
+  private String id;
   private String name;
   private String imageUrl;
   private String tip;

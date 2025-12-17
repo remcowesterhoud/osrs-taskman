@@ -35,12 +35,14 @@ public class TaskController {
   public static final String TASKMAN_RSN_HEADER = "x-taskman-rsn";
   public static final Task TAKS_GENERATE_DTO =
       Task.builder()
+          .id(null)
           .name("Generate a task!")
           .imageUrl("https://oldschool.runescape.wiki/images/Mystery_box.png?246bf")
           .tip("Click the generate button for a new task.")
           .build();
   public static final Task TASK_COMPLETE_DTO =
       Task.builder()
+          .id(null)
           .name("Task complete!")
           .imageUrl("https://oldschool.runescape.wiki/images/Birthday_balloons.png?356fd")
           .tip("Click the generate button for a new task.")
